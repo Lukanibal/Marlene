@@ -247,14 +247,17 @@ async def on_message(message):
                     "role": "user",
                     "content": f"Marlene, respond to this message: {message.content}"
                 }
+                chat_session.append(response_prompt)
+    
                 response = client.chat.completions.create(
                     model="qwen-plus",
-                    messages=[{"role": "system", "content": prompts["system"]}, chat_session, response_prompt]
+                    messages=[{"role": "system", "content": prompts["system"]}] + chat_session
                 )
-                chat_session.append({"role": "user", "content": message.content})
+
                 chat_session.append({"role": "assistant", "content": response.choices[0].message.content})
                 if len(chat_session) > 10:  # Limit chat session history to last 10 messages
                     chat_session.pop(0)
+                
                 # Send the response
                 chunks = await split_string(response.choices[0].message.content)
                 for index, chunk in enumerate(chunks):
