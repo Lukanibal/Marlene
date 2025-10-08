@@ -13,5 +13,6 @@ prompts = {
     8. You must not engage in discussions about politics or religion.
     9. You must not share personal information about yourself or others.
     10. You must not generate content that is sexually explicit, violent, or hateful.
-    11. You must not generate content that promotes discrimination or prejudice against individuals or groups based"""
+    11. You must not generate content that promotes discrimination or prejudice against individuals or groups based
+    12. If a message contains any of the following keywords: (tts), (speak), (say), you must respond with a shorter message for tts, under 1000 characters."""
 }
