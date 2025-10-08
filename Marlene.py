@@ -5,10 +5,16 @@ import discord
 from discord import app_commands
 from prompts import prompts
 import requests
+import asyncio
+import json
+from datetime import datetime, timedelta
+import random
 
 load_dotenv()
 
 bot_token = os.getenv("DISCORD_TOKEN")
+
+chat_session = []
 
 class Marlene(discord.Client):
     def __init__(self):
@@ -19,11 +25,13 @@ class Marlene(discord.Client):
         intents.emojis_and_stickers = True
         super().__init__(intents=intents, activity=status)
         self.tree = app_commands.CommandTree(self)
-        self.synced=False
+        self.synced = False
 
     async def setup_hook(self):
-        #put em here
-        pass
+        # Start the background task to reset token usage
+        asyncio.create_task(reset_token_usage())
+        # Start the background task to update status
+        asyncio.create_task(update_status())
 
     async def on_ready(self):
         if self.synced:
@@ -44,56 +52,207 @@ client = OpenAI(
     base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
 )
 
+# File to store token usage
+TOKEN_USAGE_FILE = "user_token_usage.json"
+
+# Token usage tracker
+user_token_usage = {}
+daily_token_limit = 100  # Set the daily token limit
+
+# Load token usage from JSON file
+def load_token_usage():
+    global user_token_usage
+    try:
+        with open(TOKEN_USAGE_FILE, "r") as file:
+            user_token_usage = json.load(file)
+    except FileNotFoundError:
+        user_token_usage = {}
+    except json.JSONDecodeError:
+        print("Error: Token usage file is corrupted. Resetting token usage.")
+        user_token_usage = {}
+
+# Save token usage to JSON file
+def save_token_usage():
+    with open(TOKEN_USAGE_FILE, "w") as file:
+        json.dump(user_token_usage, file)
+
+# Background task to reset token usage daily
+async def reset_token_usage():
+    while True:
+        await asyncio.sleep(24 * 60 * 60)  # Wait for 24 hours
+        user_token_usage.clear()
+        save_token_usage()
+        print("Token usage has been reset.")
+
+# List to track recent interactions
+recent_interactions = []
+
+# Function to add a new interaction to the list
+def add_interaction(interaction):
+    if len(recent_interactions) >= 10:  # Limit the list to 10 items
+        recent_interactions.pop(0)
+    recent_interactions.append(interaction)
+
+# Background task to update Marlene's status using the LLM
+async def update_status():
+    while True:
+        try:
+            # Collect recent conversational context (example: last 5 interactions)
+            context = "\n".join(recent_interactions[-5:]) if recent_interactions else "No recent interactions."
+
+            # Query the LLM for a new status
+            response = client.chat.completions.create(
+                model="qwen-plus",
+                messages=[
+                    {"role": "system", "content": "You are Marlene's assistant for generating status updates."},
+                    {"role": "user", "content": f"Generate a Discord status based on the following context: {context}"}
+                ]
+            )
+
+            # Extract the generated status
+            new_status = response.choices[0].message.content.strip()
+
+            # Update Marlene's status
+            await bot.change_presence(activity=discord.CustomActivity(name=new_status))
+        except Exception as e:
+            print(f"Error updating status: {e}")
+
+        await asyncio.sleep(300)  # Update every 5 minutes
+
+
+async def split_string(input_string):
+# Check if the string length is greater than 1500
+    if len(input_string) > 1500:
+        # Split the string into chunks of 1500 characters
+        chunks = [input_string[i:i + 1500] for i in range(0, len(input_string), 1500)]
+        return chunks
+    else:
+        # Return the original string if it's 1500 characters or less
+        return [input_string]
+
+
+@bot.tree.command(name="think", description="Use a THINK TOKEN to have Marlene think about something")
+async def think(interaction: discord.Interaction, thought: str):
+    user_id = str(interaction.user.id)  # Use string keys for JSON compatibility
+
+    # Initialize token usage for the user if not already present
+    if user_id not in user_token_usage:
+        user_token_usage[user_id] = 0
+
+    # Check if the user has exceeded their daily limit
+    if user_token_usage[user_id] >= daily_token_limit:
+        await interaction.response.send_message(
+            f"Sorry, {interaction.user.mention}, you have reached your daily token limit of {daily_token_limit}. Please try again tomorrow.",
+            ephemeral=True
+        )
+        return
+
+    # Increment token usage (assuming 1 token per command; adjust as needed)
+    user_token_usage[user_id] += 1
+    save_token_usage()  # Save the updated token usage
+
+    # Add the interaction to the recent interactions list
+    add_interaction(f"User thought: {thought[:50]}...")
+
+    # Process the think command
+    await interaction.response.defer()
+    completion = client.chat.completions.create(
+        model="qwen-plus",
+        messages=[
+            {"role": "system", "content": prompts["system"]},
+            {"role": "user", "content": thought}
+        ],
+        stream=True,
+        top_p=0.8,
+        temperature=0.7,
+        extra_body={
+            "enable_thinking": True,
+            "thinking_budget": 100
+        }
+    )
+
+    reasoning_content = ""  # Complete reasoning process
+    answer_content = ""  # Complete response
+    is_answering = False  # Whether entering the response phase
+
+    print("=" * 20 + "Thinking Process" + "=" * 20)
+
+    for chunk in completion:
+        if not chunk.choices:
+            print("Usage:")
+            print(chunk.usage)
+            continue
+
+        delta = chunk.choices[0].delta
+
+        # Collect reasoning content
+        if hasattr(delta, "reasoning_content") and delta.reasoning_content is not None:
+            if not is_answering:
+                print(delta.reasoning_content, end="", flush=True)
+            reasoning_content += delta.reasoning_content
+
+        # Collect the final response content
+        if hasattr(delta, "content") and delta.content:
+            if not is_answering:
+                print("=" * 20 + "Complete Response" + "=" * 20)
+                is_answering = True
+            print(delta.content, end="", flush=True)
+            answer_content += delta.content
+
+    # Send the full response back to the user
+    chunks = await split_string(answer_content)
+    for index, chunk in enumerate(chunks):
+        if index == 0:
+            await interaction.followup.send(chunk)
+        else:
+            await interaction.channel.send(chunk)
+
+    #await interaction.followup.send(f"{answer_content}")
 
 #=============================================#
 ##############MESSAGE HANDLING#################
 #=============================================#
 @bot.event 
 async def on_message(message):
-    # we do not want the bot to reply to itself
+    # We do not want the bot to reply to itself
     if message.author == bot.user:
         return
-    
-    '''if message.author.bot:
-        bot_check = bl.handle_bot_message(message.author.name)
-        if bot_check == -1:
-            return
-        if bot_check == 0:
-            pass'''
-    
-     # Check if the bot is mentioned in the message
 
-    #if bot.user in message.mentions:
-    async with message.channel.typing():
-        msg = message.content.replace(f"<@{bot.user.id}>", "")
-        prompt = {'role': 'user', 'name': message.author.global_name, "content": f"This message is from the user {message.author.global_name}: {msg}"}
-        if message.attachments:
-            # Filter for image attachments
-            image_attachments = [attachment for attachment in message.attachments if attachment.content_type and attachment.content_type.startswith('image/')]
+    # Check if Marlene is mentioned by user_id or name
+    marlene_mentioned = bot.user in message.mentions or "Marlene" in message.content
 
-            if image_attachments:
-                image_url = image_attachments[0].url
-                # Download the image
-                response = requests.get(image_url)
-                if response.status_code == 200:
-                    # Save the image to a file
-                    file_path = os.path.join("images", image_attachments[0].filename)  # Specify the directory and filename
-                    os.makedirs("images", exist_ok=True)  # Create the directory if it doesn't exist
+    # Analyze the message content
+    if marlene_mentioned or "Marlene" in message.content:
+        # Use a language model to decide if Marlene should respond
+        prompt = {
+            "role": "user",
+            "content": f"Should Marlene respond to this message; yes or no? Message: {message.content}"
+        }
+        decision = client.chat.completions.create(
+            model="qwen-plus",
+            messages=[{"role": "system", "content": "You are Marlene's decision-making assistant."}, prompt]
+        )
 
-                    with open(file_path, 'wb') as f:
-                        f.write(response.content)
-                    
-                    prompt = {'role': 'user', 'name': message.author.global_name, 'content': f"This message is from the user {message.author.global_name}: {msg}", 'images': [file_path]}
-                    
-        completion = client.chat.completions.create(
-        model="qwen-plus", # Model list: https://www.alibabacloud.com/help/en/model-studio/getting-started/models
-        messages=[{"role": "system", "content": prompts["system"]},
-        prompt])
-        await message.reply(completion.choices[0].message.content, mention_author=True)
+        # Parse the decision
+        should_respond = "yes" in decision.choices[0].message.content.lower()
+
+        if should_respond:
+            async with message.channel.typing():
+                # Generate a response
+                response_prompt = {
+                    "role": "user",
+                    "content": f"Marlene, respond to this message: {message.content}"
+                }
+                response = client.chat.completions.create(
+                    model="qwen-plus",
+                    messages=[{"role": "system", "content": prompts["system"]}, response_prompt]
+                )
+
+                # Send the response
+                await message.reply(response.choices[0].message.content, mention_author=True)
 
 
-            
-
-
+# Load token usage on startup
+load_token_usage()
 
 bot.run(bot_token)
