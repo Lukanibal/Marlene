@@ -199,6 +199,10 @@ async def think(interaction: discord.Interaction, thought: str):
             print(delta.content, end="", flush=True)
             answer_content += delta.content
 
+    chat_session.append({"role": "user", "content": thought})
+    chat_session.append({"role": "assistant", "content": answer_content})
+    if len(chat_session) > 10:  # Limit chat session history to last 10 messages
+        chat_session.pop(0)
     # Send the full response back to the user
     chunks = await split_string(answer_content)
     for index, chunk in enumerate(chunks):
@@ -245,9 +249,12 @@ async def on_message(message):
                 }
                 response = client.chat.completions.create(
                     model="qwen-plus",
-                    messages=[{"role": "system", "content": prompts["system"]}, response_prompt]
+                    messages=[{"role": "system", "content": prompts["system"]}, chat_session, response_prompt]
                 )
-
+                chat_session.append({"role": "user", "content": message.content})
+                chat_session.append({"role": "assistant", "content": response.choices[0].message.content})
+                if len(chat_session) > 10:  # Limit chat session history to last 10 messages
+                    chat_session.pop(0)
                 # Send the response
                 chunks = await split_string(response.choices[0].message.content)
                 for index, chunk in enumerate(chunks):
