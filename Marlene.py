@@ -249,7 +249,13 @@ async def on_message(message):
                 )
 
                 # Send the response
-                await message.reply(response.choices[0].message.content, mention_author=True)
+                chunks = await split_string(response.choices[0].message.content)
+                for index, chunk in enumerate(chunks):
+                    if index == 0:
+                        await message.reply(chunk, mention_author=True)
+                    else:
+                        await message.reply(chunk, mention_author=False)
+                
 
 
 # Load token usage on startup
