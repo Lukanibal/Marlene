@@ -237,6 +237,9 @@ async def speak(interaction: discord.Interaction, message: str):
     else:
         await interaction.followup.send("Sorry, there was an error generating the speech.")
 
+@bot.tree.command(name="help", description="Get a list of Marlene's commands")
+async def help_command(interaction: discord.Interaction):
+    await interaction.response.send_message(prompts["help"], ephemeral=True)
 #=============================================#
 ##############MESSAGE HANDLING#################
 #=============================================#
