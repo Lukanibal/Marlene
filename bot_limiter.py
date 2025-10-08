@@ -5,7 +5,7 @@ from datetime import datetime
 # used for limited responses to bots
 bot_reply_timeout = {}
 MAX_MESSAGES = 3
-COOLDOWN_SECONDS = 30
+COOLDOWN_SECONDS = 90
 
 
 def handle_bot_message(username):
