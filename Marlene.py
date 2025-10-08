@@ -10,6 +10,14 @@ import json
 from datetime import datetime, timedelta
 import random
 import bot_limiter as bl
+from elevenlabs.client import ElevenLabs
+from elevenlabs import save
+import tts
+
+elevenlabs = ElevenLabs(
+  api_key=os.getenv("ELEVEN_LABS_KEY"),
+)
+
 
 load_dotenv()
 
@@ -214,6 +222,16 @@ async def think(interaction: discord.Interaction, thought: str):
 
     #await interaction.followup.send(f"{answer_content}")
 
+@bot.tree.command(name="speak", description="Have Marlene speak a message using ElevenLabs")
+async def speak(interaction: discord.Interaction, message: str):
+    await interaction.response.defer()
+    
+    tts_file = await tts.text_to_speech(message, file_name=f"marlene_speak_{interaction.id}")
+    if tts_file:
+        await interaction.followup.send(file=discord.File(tts_file))
+    else:
+        await interaction.followup.send("Sorry, there was an error generating the speech.")
+
 #=============================================#
 ##############MESSAGE HANDLING#################
 #=============================================#
@@ -233,6 +251,7 @@ async def on_message(message):
     # Check if Marlene is mentioned by user_id or name
     marlene_mentioned = bot.user in message.mentions or "marlene" in message.content.lower()
 
+    tts_trigger = any(keyword in message.content.lower() for keyword in ["(tts)", "(speak)", "(say)"])
     # Analyze the message content
     if marlene_mentioned:
         # Use a language model to decide if Marlene should respond
@@ -267,12 +286,19 @@ async def on_message(message):
                     chat_session.pop(0)
                 
                 # Send the response
-                chunks = await split_string(response.choices[0].message.content)
-                for index, chunk in enumerate(chunks):
-                    if index == 0:
-                        await message.reply(chunk, mention_author=True)
+                if tts_trigger:
+                    tts_file = await tts.text_to_speech(response.choices[0].message.content, file_name=f"marlene_reply_{message.id}")
+                    if tts_file:
+                        await message.reply(file=discord.File(tts_file), mention_author=True)
                     else:
-                        await message.reply(chunk, mention_author=False)
+                        await message.reply("Sorry, there was an error generating the speech.", mention_author=True)
+                else:
+                    chunks = await split_string(response.choices[0].message.content)
+                    for index, chunk in enumerate(chunks):
+                        if index == 0:
+                            await message.reply(chunk, mention_author=True)
+                        else:
+                            await message.reply(chunk, mention_author=False)
                 
 
 
