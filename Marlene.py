@@ -231,18 +231,18 @@ async def on_message(message):
             pass
 
     # Check if Marlene is mentioned by user_id or name
-    marlene_mentioned = bot.user in message.mentions or "Marlene" in message.content
+    marlene_mentioned = bot.user in message.mentions or "marlene" in message.content.lower()
 
     # Analyze the message content
-    if marlene_mentioned or "Marlene" in message.content:
+    if marlene_mentioned:
         # Use a language model to decide if Marlene should respond
         prompt = {
             "role": "user",
             "content": f"Should Marlene respond to this message; yes or no? Message: {message.content}"
         }
         decision = client.chat.completions.create(
-            model="qwen-plus",
-            messages=[{"role": "system", "content": "You are Marlene's decision-making assistant."}, prompt]
+            model="qwen-flash",
+            messages=[{"role": "system", "content": "You are a basic input output machine, only respond with yes or no."}, prompt]
         )
 
         # Parse the decision
