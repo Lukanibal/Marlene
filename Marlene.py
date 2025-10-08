@@ -228,7 +228,12 @@ async def speak(interaction: discord.Interaction, message: str):
     
     tts_file = await tts.text_to_speech(message, file_name=f"marlene_speak_{interaction.id}")
     if tts_file:
-        await interaction.followup.send(file=discord.File(tts_file))
+        embed = discord.Embed(
+                            title='Marlene TTS',
+                            description=message,
+                            color=discord.Color.teal()
+                        )
+        await interaction.followup.send(embed=embed, file=discord.File(tts_file))
     else:
         await interaction.followup.send("Sorry, there was an error generating the speech.")
 
@@ -289,7 +294,12 @@ async def on_message(message):
                 if tts_trigger:
                     tts_file = await tts.text_to_speech(response.choices[0].message.content, file_name=f"marlene_reply_{message.id}")
                     if tts_file:
-                        await message.reply(file=discord.File(tts_file), mention_author=True)
+                        embed = discord.Embed(
+                            title='Marlene TTS',
+                            description=response.choices[0].message.content,
+                            color=discord.Color.teal()
+                        )
+                        await message.reply(embed=embed, file=discord.File(tts_file), mention_author=True)
                     else:
                         await message.reply("Sorry, there was an error generating the speech.", mention_author=True)
                 else:
