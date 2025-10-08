@@ -9,6 +9,7 @@ import asyncio
 import json
 from datetime import datetime, timedelta
 import random
+import bot_limiter as bl
 
 load_dotenv()
 
@@ -221,6 +222,13 @@ async def on_message(message):
     # We do not want the bot to reply to itself
     if message.author == bot.user or message.channel.id == int(os.getenv("IGNORED_CHANNEL")):
         return
+    
+    if message.author.bot:
+        bot_check = bl.handle_bot_message(message.author.name)
+        if bot_check == -1:
+            return
+        if bot_check == 0:
+            pass
 
     # Check if Marlene is mentioned by user_id or name
     marlene_mentioned = bot.user in message.mentions or "Marlene" in message.content
