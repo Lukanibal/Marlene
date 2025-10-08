@@ -215,7 +215,7 @@ async def think(interaction: discord.Interaction, thought: str):
 @bot.event 
 async def on_message(message):
     # We do not want the bot to reply to itself
-    if message.author == bot.user:
+    if message.author == bot.user or message.channel.id == int(os.getenv("IGNORED_CHANNEL")):
         return
 
     # Check if Marlene is mentioned by user_id or name
