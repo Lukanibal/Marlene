@@ -2,6 +2,7 @@ import os
 from openai import OpenAI
 from dotenv import load_dotenv
 import prompts
+import asyncio
 
 load_dotenv()
 
@@ -15,8 +16,9 @@ client = OpenAI(
 )
 
 async def generate_response(prompt):
-    response = client.chat.completions.create(
+    response = await asyncio.to_thread(
+    client.chat.completions.create(
         model="qwen-plus",
         messages=[{"role": "system", "content": prompts["system"]}, {"role": "user", "content": f"Marlene, respond to this message: {prompt}"}]
-    )
+    ))
     return response.choices[0].message.content
