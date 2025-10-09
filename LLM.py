@@ -16,9 +16,8 @@ client = OpenAI(
 )
 
 async def generate_response(prompt):
-    response = await asyncio.to_thread(
-    client.chat.completions.create(
+    response = client.chat.completions.create(
         model="qwen-plus",
         messages=[{"role": "system", "content": prompts["system"]}, {"role": "user", "content": f"Marlene, respond to this message: {prompt}"}]
-    ))
+    )
     return response.choices[0].message.content
