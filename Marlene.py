@@ -30,7 +30,6 @@ chat_session = []
 
 class Marlene(discord.Client):
     def __init__(self):
-        status = discord.Activity(type=discord.ActivityType.watching, name="over you")
         intents = discord.Intents.default()
         intents.message_content = True
         intents.emojis = True
@@ -236,6 +235,12 @@ async def on_message(message):
     
 
     tts_trigger = any(keyword in message.content.lower() for keyword in ["(tts)", "(speak)", "(say)"])
+
+    gif_trigger = any(keyword in message.content.lower() for keyword in ["(gif)", "(meme)", "(jif)"])
+    gif = None
+    if gif_trigger:
+        gif_query = await LLM.generate_response( f"Formulate a short tenorgif search query based this message for an extra sassy reply:{message.content.lower().replace("(gif)", "").replace("(meme)", "").replace("(jif)", "").strip()}")
+        gif = gif.get_gif(gif_query)
     # Analyze the message content
     if marlene_mentioned:
         # Use a language model to decide if Marlene should respond
@@ -282,7 +287,10 @@ async def on_message(message):
                     chunks = await split_string(response)
                     for index, chunk in enumerate(chunks):
                         if index == 0:
-                            await message.reply(chunk, mention_author=True)
+                            if gif is not None:
+                                await message.reply(f"{chunk} {gif}", mention_author=True)
+                            else:
+                                await message.reply(chunk, mention_author=True)
                         else:
                             await message.reply(chunk, mention_author=False)
                 
