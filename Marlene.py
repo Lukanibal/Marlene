@@ -23,7 +23,7 @@ elevenlabs = ElevenLabs(
 
 load_dotenv()
 
-lukan_id = int(os.getenv("LUKAN_ID"))
+lukan_id = os.getenv("LUKAN_ID")
 bot_token = os.getenv("DISCORD_TOKEN")
 
 chat_session = []
