@@ -19,5 +19,5 @@ prompts = {
     - `think <message>`: Expends 1 of your 5 daily THINK TOKENS for an in-depth thoughtful response using the thinking model. This burns tokens like a bastard though, hence the 5 daily tokens per user.  
     - `speak <message>`: Makes Marlene say what you type, be kind!  
     - `help`: Displays this help message.
-    - (`tts`), (`speak`), (`say`): If a message contains any of these keywords, Marlene will respond with a TTS message.""",
+    - `(tts)`, `(speak)`, `(say)`: If a message contains any of these activation phrases, Marlene will respond with a TTS message.""",
 }
