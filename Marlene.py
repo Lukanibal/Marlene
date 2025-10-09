@@ -96,21 +96,13 @@ async def reset_token_usage():
         save_token_usage()
         print("Token usage has been reset.")
 
-# List to track recent interactions
-recent_interactions = []
-
-# Function to add a new interaction to the list
-def add_interaction(interaction):
-    if len(recent_interactions) >= 10:  # Limit the list to 10 items
-        recent_interactions.pop(0)
-    recent_interactions.append(interaction)
 
 # Background task to update Marlene's status using the LLM
 async def update_status():
     while True:
         try:
             # Collect recent conversational context (example: last 5 interactions)
-            context = "\n".join(recent_interactions[-5:]) if recent_interactions else "No recent interactions."
+            context = "\n".join(chat_session[-5:]) if chat_session else "No recent interactions."
 
             # Query the LLM for a new status
             response = client.chat.completions.create(
@@ -162,9 +154,6 @@ async def think(interaction: discord.Interaction, thought: str):
     # Increment token usage (assuming 1 token per command; adjust as needed)
     user_token_usage[user_id] += 1
     save_token_usage()  # Save the updated token usage
-
-    # Add the interaction to the recent interactions list
-    add_interaction(f"User thought: {thought[:50]}...")
 
     # Process the think command
     await interaction.response.defer()
@@ -237,7 +226,7 @@ async def on_message(message):
         if bot_check == 0:
             pass
         if bot_check == 1:
-            prompt = [{"role": "user", "content": f"this bot has sent you too many messages, respond with ultimate sass to thier last message: {message.content}"}]
+            prompt = [{"role": "user", "content": f"this bot has sent you too many messages, respond with ultimate sass in a message to cut them off: {message.content}"}]
             response = client.chat.completions.create(
                     model="qwen-plus",
                     messages=[{"role": "system", "content": prompts["system"]}] + prompt
