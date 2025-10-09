@@ -23,6 +23,7 @@ elevenlabs = ElevenLabs(
 
 load_dotenv()
 
+lukan_id = int(os.getenv("LUKAN_ID"))
 bot_token = os.getenv("DISCORD_TOKEN")
 
 chat_session = []
@@ -204,6 +205,8 @@ async def help_command(interaction: discord.Interaction):
 
 @bot.tree.command(name="delete", description="Delete a message in this channel")
 async def delete_message(interaction: discord.Interaction, message_id: str):
+    if interaction.user.id != lukan_id:
+          await interaction.response.send_message(f"You are not Lukan!", ephemeral=True)
     try:
         message = await interaction.channel.fetch_message(int(message_id))
         if message:
