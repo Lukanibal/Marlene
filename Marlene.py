@@ -167,48 +167,7 @@ async def think(interaction: discord.Interaction, thought: str):
 
     # Process the think command
     await interaction.response.defer()
-    completion = client.chat.completions.create(
-        model="qwen-plus",
-        messages=[
-            {"role": "system", "content": prompts["system"]},
-            {"role": "user", "content": thought}
-        ],
-        stream=True,
-        top_p=0.8,
-        temperature=0.7,
-        extra_body={
-            "enable_thinking": True,
-            "thinking_budget": 100
-        }
-    )
-
-    reasoning_content = ""  # Complete reasoning process
-    answer_content = ""  # Complete response
-    is_answering = False  # Whether entering the response phase
-
-    print("=" * 20 + "Thinking Process" + "=" * 20)
-
-    for chunk in completion:
-        if not chunk.choices:
-            print("Usage:")
-            print(chunk.usage)
-            continue
-
-        delta = chunk.choices[0].delta
-
-        # Collect reasoning content
-        if hasattr(delta, "reasoning_content") and delta.reasoning_content is not None:
-            if not is_answering:
-                print(delta.reasoning_content, end="", flush=True)
-            reasoning_content += delta.reasoning_content
-
-        # Collect the final response content
-        if hasattr(delta, "content") and delta.content:
-            if not is_answering:
-                print("=" * 20 + "Complete Response" + "=" * 20)
-                is_answering = True
-            print(delta.content, end="", flush=True)
-            answer_content += delta.content
+    answer_content = await LLM.generate_response(thought, think=True)
 
     chat_session.append({"role": "user", "content": thought})
     chat_session.append({"role": "assistant", "content": answer_content})
