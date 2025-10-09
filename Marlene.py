@@ -238,10 +238,10 @@ async def on_message(message):
     tts_trigger = any(keyword in message.content.lower() for keyword in ["(tts)", "(speak)", "(say)"])
 
     gif_trigger = any(keyword in message.content.lower() for keyword in ["(gif)", "(meme)", "(jif)"])
-    gif = None
+    gif_choice = None
     if gif_trigger:
         gif_query = await LLM.generate_response( f"Formulate a short tenorgif search query based this message for an extra sassy reply:{message.content.lower().replace("(gif)", "").replace("(meme)", "").replace("(jif)", "").strip()}")
-        gif = gif.get_gif(gif_query)
+        gif_choice = gif.get_gif(gif_query)
     # Analyze the message content
     if marlene_mentioned:
         # Use a language model to decide if Marlene should respond
@@ -289,7 +289,7 @@ async def on_message(message):
                     for index, chunk in enumerate(chunks):
                         if index == 0:
                             if gif is not None:
-                                await message.reply(f"{chunk} {gif}", mention_author=True)
+                                await message.reply(f"{chunk} {gif_choice}", mention_author=True)
                             else:
                                 await message.reply(chunk, mention_author=True)
                         else:
