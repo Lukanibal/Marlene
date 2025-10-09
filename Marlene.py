@@ -251,6 +251,7 @@ async def on_message(message):
         }
         decision = client.chat.completions.create(
             model="qwen-flash",
+            temperature=0.0,
             messages=[{"role": "system", "content": "You are a basic input output machine, only respond with yes or no."}, prompt]
         )
 
