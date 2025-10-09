@@ -295,7 +295,7 @@ async def on_message(message):
                 }
                 chat_session.append(response_prompt)
     
-                response = LLM.generate_response(message.content)
+                response = await LLM.generate_response(message.content)
 
                 chat_session.append({"role": "assistant", "content": response})
                 if len(chat_session) > 10:  # Limit chat session history to last 10 messages
