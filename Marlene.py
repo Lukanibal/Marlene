@@ -13,6 +13,8 @@ import bot_limiter as bl
 from elevenlabs.client import ElevenLabs
 from elevenlabs import save
 import tts
+import gif
+import LLM
 
 elevenlabs = ElevenLabs(
   api_key=os.getenv("ELEVEN_LABS_KEY"),
@@ -293,29 +295,26 @@ async def on_message(message):
                 }
                 chat_session.append(response_prompt)
     
-                response = client.chat.completions.create(
-                    model="qwen-plus",
-                    messages=[{"role": "system", "content": prompts["system"]}] + chat_session
-                )
+                response = LLM.generate_response(message.content)
 
-                chat_session.append({"role": "assistant", "content": response.choices[0].message.content})
+                chat_session.append({"role": "assistant", "content": response})
                 if len(chat_session) > 10:  # Limit chat session history to last 10 messages
                     chat_session.pop(0)
                 
                 # Send the response
                 if tts_trigger:
-                    tts_file = await tts.text_to_speech(response.choices[0].message.content, file_name=f"marlene_reply_{message.id}")
+                    tts_file = await tts.text_to_speech(response, file_name=f"marlene_reply_{message.id}")
                     if tts_file:
                         embed = discord.Embed(
                             title='Marlene TTS',
-                            description=response.choices[0].message.content,
+                            description=response,
                             color=discord.Color.teal()
                         )
                         await message.reply(embed=embed, file=discord.File(tts_file), mention_author=True)
                     else:
                         await message.reply("Sorry, there was an error generating the speech.", mention_author=True)
                 else:
-                    chunks = await split_string(response.choices[0].message.content)
+                    chunks = await split_string(response)
                     for index, chunk in enumerate(chunks):
                         if index == 0:
                             await message.reply(chunk, mention_author=True)
