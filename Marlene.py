@@ -201,6 +201,18 @@ async def speak(interaction: discord.Interaction, message: str):
 @bot.tree.command(name="help", description="Get a list of Marlene's commands")
 async def help_command(interaction: discord.Interaction):
     await interaction.response.send_message(prompts["help"], ephemeral=True)
+
+@bot.tree.command(name="delete", description="Delete a message in this channel")
+async def delete_message(interaction: discord.Interaction, message_id: str):
+    try:
+        message = await interaction.channel.fetch_message(int(message_id))
+        if message:
+            await message.delete()
+            await interaction.response.send_message(f"Message {message_id} deleted.", ephemeral=True)
+        else:
+            await interaction.response.send_message(f"Message {message_id} not found.", ephemeral=True)
+    except Exception as e:
+        await interaction.response.send_message(f"Error deleting message: {e}", ephemeral=True)
 #=============================================#
 ##############MESSAGE HANDLING#################
 #=============================================#
