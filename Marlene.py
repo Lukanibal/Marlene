@@ -30,6 +30,7 @@ chat_session = []
 
 class Marlene(discord.Client):
     def __init__(self):
+        status = discord.Activity(type=discord.ActivityType.watching, name="you")
         intents = discord.Intents.default()
         intents.message_content = True
         intents.emojis = True
