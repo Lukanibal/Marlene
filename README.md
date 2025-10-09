@@ -15,3 +15,4 @@ COMMANDS:
   
 MESSAGE TYPES:
 -
+`(tts)`, `(speak)`, and `(say)` in a message directed at her will make her respond with her dazzling voice!

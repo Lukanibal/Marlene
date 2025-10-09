@@ -66,7 +66,7 @@ TOKEN_USAGE_FILE = "user_token_usage.json"
 
 # Token usage tracker
 user_token_usage = {}
-daily_token_limit = 100  # Set the daily token limit
+daily_token_limit = 5  # Set the daily token limit
 
 # Load token usage from JSON file
 def load_token_usage():
