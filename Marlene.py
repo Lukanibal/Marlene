@@ -213,11 +213,11 @@ async def delete_message(interaction: discord.Interaction, message_id: str):
             message = await interaction.channel.fetch_message(int(message_id))
             if message:
                 await message.delete()
-                await interaction.response.send_message(f"Message {message_id} deleted.", ephemeral=True)
+                await interaction.followup.send(f"Message {message_id} deleted.", ephemeral=True)
             else:
-                await interaction.response.send_message(f"Message {message_id} not found.", ephemeral=True)
+                await interaction.followup.send(f"Message {message_id} not found.", ephemeral=True)
         except Exception as e:
-            await interaction.response.send_message(f"Error deleting message: {e}", ephemeral=True)
+            await interaction.followup.send(f"Error deleting message: {e}", ephemeral=True)
 #=============================================#
 ##############MESSAGE HANDLING#################
 #=============================================#
