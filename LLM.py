@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
-import prompts
+from prompts import prompts
 import asyncio
 
 load_dotenv()
