@@ -60,7 +60,7 @@ async def generate_response(prompt, think=False):
                 print(delta.content, end="", flush=True)
                 answer_content += delta.content
 
-            return answer_content
+        return answer_content
 
     else:
         response = client.chat.completions.create(
