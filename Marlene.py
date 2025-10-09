@@ -205,17 +205,18 @@ async def help_command(interaction: discord.Interaction):
 
 @bot.tree.command(name="delete", description="Delete a message in this channel")
 async def delete_message(interaction: discord.Interaction, message_id: str):
-    if interaction.user.id != lukan_id:
+    if interaction.user.id != int(lukan_id):
           await interaction.response.send_message(f"You are not Lukan!", ephemeral=True)
-    try:
-        message = await interaction.channel.fetch_message(int(message_id))
-        if message:
-            await message.delete()
-            await interaction.response.send_message(f"Message {message_id} deleted.", ephemeral=True)
-        else:
-            await interaction.response.send_message(f"Message {message_id} not found.", ephemeral=True)
-    except Exception as e:
-        await interaction.response.send_message(f"Error deleting message: {e}", ephemeral=True)
+    else:
+        try:
+            message = await interaction.channel.fetch_message(int(message_id))
+            if message:
+                await message.delete()
+                await interaction.response.send_message(f"Message {message_id} deleted.", ephemeral=True)
+            else:
+                await interaction.response.send_message(f"Message {message_id} not found.", ephemeral=True)
+        except Exception as e:
+            await interaction.response.send_message(f"Error deleting message: {e}", ephemeral=True)
 #=============================================#
 ##############MESSAGE HANDLING#################
 #=============================================#
