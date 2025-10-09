@@ -249,15 +249,24 @@ async def on_message(message):
     if message.author == bot.user or message.channel.id == int(os.getenv("IGNORED_CHANNEL")):
         return
     
-    if message.author.bot:
+    # Check if Marlene is mentioned by user_id or name
+    marlene_mentioned = bot.user in message.mentions or "marlene" in message.content.lower()
+
+    if message.author.bot and marlene_mentioned:
         bot_check = bl.handle_bot_message(message.author.name)
         if bot_check == -1:
             return
         if bot_check == 0:
             pass
-
-    # Check if Marlene is mentioned by user_id or name
-    marlene_mentioned = bot.user in message.mentions or "marlene" in message.content.lower()
+        if bot_check == 1:
+            prompt = [{"role": "user", "content": f"this bot has sent you too many messages, respond with ultimate sass to thier last message: {message.content}"}]
+            response = client.chat.completions.create(
+                    model="qwen-plus",
+                    messages=[{"role": "system", "content": prompts["system"]}] + prompt
+                )
+            await message.reply(response.choices[0].message.content, mention_author=True)
+            return
+    
 
     tts_trigger = any(keyword in message.content.lower() for keyword in ["(tts)", "(speak)", "(say)"])
     # Analyze the message content

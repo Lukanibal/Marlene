@@ -32,6 +32,13 @@ def handle_bot_message(username):
         user_data["message_count"] = 0
         user_data["cooldown_until"] = 0
 
+    
+
+    # Marlene responds with ultimate sass on the last allowed message
+    if user_data["message_count"] == (MAX_MESSAGES-1):
+        user_data["message_count"] += 1
+        return 1
+
     # Increment message count
     user_data["message_count"] += 1
 
