@@ -205,6 +205,7 @@ async def help_command(interaction: discord.Interaction):
 
 @bot.tree.command(name="delete", description="Delete a message in this channel")
 async def delete_message(interaction: discord.Interaction, message_id: str):
+    await interaction.response.defer(ephemeral=True)
     if interaction.user.id != int(lukan_id):
           await interaction.response.send_message(f"You are not Lukan!", ephemeral=True)
     else:
