@@ -288,7 +288,7 @@ async def on_message(message):
                     chunks = await split_string(response)
                     for index, chunk in enumerate(chunks):
                         if index == 0:
-                            if gif is not None:
+                            if gif_choice is not None:
                                 await message.reply(f"{chunk} [gif]({gif_choice})", mention_author=True)
                             else:
                                 await message.reply(chunk, mention_author=True)
