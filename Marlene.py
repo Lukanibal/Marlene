@@ -83,7 +83,7 @@ async def update_status():
             new_status = response.choices[0].message.content.strip()
 
             # Update Marlene's status
-            await bot.change_presence(activity=discord.Activity(type = discord.CustomActivity, name=new_status))
+            await bot.change_presence(activity=discord.CustomActivity(name=new_status, emoji=None))
         except Exception as e:
             print(f"Error updating status: {e} : {new_status}")
 
