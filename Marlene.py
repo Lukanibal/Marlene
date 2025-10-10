@@ -63,8 +63,6 @@ client = OpenAI(
     base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
 )
 
-
-
 # Background task to update Marlene's status using the LLM
 async def update_status():
     while True:
@@ -74,7 +72,7 @@ async def update_status():
 
             # Query the LLM for a new status
             response = client.chat.completions.create(
-                model="qwen-flash",
+                model="qwen-plus",
                 messages=[
                     {"role": "system", "content": "You are Marlene's assistant for generating status updates."},
                     {"role": "user", "content": f"Generate a Discord status based on the following context: {context}"}
@@ -85,9 +83,9 @@ async def update_status():
             new_status = response.choices[0].message.content.strip()
 
             # Update Marlene's status
-            await bot.change_presence(activity=discord.CustomActivity(name=new_status))
+            await bot.change_presence(activity=discord.Activity(type = discord.CustomActivity, name=new_status))
         except Exception as e:
-            print(f"Error updating status: {e}")
+            print(f"Error updating status: {e} : {new_status}")
 
         await asyncio.sleep(300)  # Update every 5 minutes
 
