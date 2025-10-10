@@ -71,16 +71,18 @@ async def update_status():
             context = "\n".join(chat_session[-5:]) if chat_session else "No recent interactions."
 
             # Query the LLM for a new status
-            response = client.chat.completions.create(
+            response = await Qwen.generate_response(f"Generate a witty and engaging Discord status for Marlene based on the following context:\n{context}\n\nThe status should be concise (under 128 characters) and reflect Marlene's personality. Avoid using special characters.")
+            
+            '''client.chat.completions.create(
                 model="qwen-plus",
                 messages=[
                     {"role": "system", "content": "You are Marlene's assistant for generating status updates."},
-                    {"role": "user", "content": f"Generate a Discord status based on the following context: {context}"}
+                    {"role": "user", "content": }
                 ]
-            )
+            )'''
 
             # Extract the generated status
-            new_status = response.choices[0].message.content.strip()
+            new_status = response.strip()
 
             # Update Marlene's status
             await bot.change_presence(activity=discord.CustomActivity(name=new_status, emoji=""))
