@@ -14,7 +14,7 @@ from elevenlabs.client import ElevenLabs
 import tts
 import gif
 import LLM
-from bot_commands import split_string, load_token_usage, think
+from bot_funcs import split_string, load_token_usage, think
 
 elevenlabs = ElevenLabs(
   api_key=os.getenv("ELEVEN_LABS_KEY"),
