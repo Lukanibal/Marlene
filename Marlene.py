@@ -169,7 +169,7 @@ async def on_message(message):
     if gif_trigger:
         gif_query = await LLM.generate_response( f"Formulate a short tenorgif search query based this message for an extra sassy reply:{message.content.lower().replace("(gif)", "").replace("(meme)", "").replace("(jif)", "").strip()}")
         gif_choice = gif.get_gif(gif_query)
-        
+
     # Analyze the message content
     if marlene_mentioned:
         # Use a language model to decide if Marlene should respond
@@ -227,6 +227,6 @@ async def on_message(message):
 
 
 # Load token usage on startup
-load_token_usage()
+bc.load_token_usage()
 
 bot.run(bot_token)
