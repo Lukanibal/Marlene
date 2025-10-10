@@ -14,7 +14,7 @@ from elevenlabs.client import ElevenLabs
 import tts
 import gif
 import LLM
-import bot_commands as bc
+from bot_commands import split_string, load_token_usage, think
 
 elevenlabs = ElevenLabs(
   api_key=os.getenv("ELEVEN_LABS_KEY"),
@@ -96,8 +96,8 @@ async def update_status():
 
 
 @bot.tree.command(name="think", description="Use a THINK TOKEN to have Marlene think about something")
-async def think(interaction: discord.Interaction, thought: str):
-    await bc.think(interaction, thought)
+async def think_command(interaction: discord.Interaction, thought: str):
+    await think(interaction, thought)
 
 @bot.tree.command(name="speak", description="Have Marlene speak a message using ElevenLabs")
 async def speak(interaction: discord.Interaction, message: str):
@@ -214,7 +214,7 @@ async def on_message(message):
                     else:
                         await message.reply("Sorry, there was an error generating the speech.", mention_author=True)
                 else:
-                    chunks = await bc.split_string(response)
+                    chunks = await split_string(response)
                     for index, chunk in enumerate(chunks):
                         if index == 0:
                             if gif_choice is not None:
@@ -227,6 +227,6 @@ async def on_message(message):
 
 
 # Load token usage on startup
-bc.load_token_usage()
+load_token_usage()
 
 bot.run(bot_token)
