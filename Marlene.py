@@ -14,7 +14,7 @@ from elevenlabs.client import ElevenLabs
 import tts
 import gif
 import Qwen
-from bot_funcs import split_string, load_token_usage, think
+import bot_funcs as bf
 
 elevenlabs = ElevenLabs(
   api_key=os.getenv("ELEVEN_LABS_KEY"),
@@ -40,7 +40,7 @@ class Marlene(discord.Client):
 
     async def setup_hook(self):
         # Start the background task to reset token usage
-        asyncio.create_task(reset_token_usage())
+        asyncio.create_task(bf.reset_token_usage())
         # Start the background task to update status
         asyncio.create_task(update_status())
 
@@ -97,8 +97,8 @@ async def update_status():
 
 @bot.tree.command(name="think", description="Use a THINK TOKEN to have Marlene think about something")
 async def think_command(interaction: discord.Interaction, thought: str):
-    chat = await think(interaction, thought, chat_session, daily_token_limit, user_token_usage)
-    chat_session += chat
+    chat = await bf.think(interaction, thought, daily_token_limit, user_token_usage)
+    chat_session.append(chat)
 
 @bot.tree.command(name="speak", description="Have Marlene speak a message using ElevenLabs")
 async def speak(interaction: discord.Interaction, message: str):
@@ -215,7 +215,7 @@ async def on_message(message):
                     else:
                         await message.reply("Sorry, there was an error generating the speech.", mention_author=True)
                 else:
-                    chunks = await split_string(response)
+                    chunks = await bf.split_string(response)
                     for index, chunk in enumerate(chunks):
                         if index == 0:
                             if gif_choice is not None:
@@ -232,6 +232,6 @@ async def on_message(message):
 user_token_usage = {}
 daily_token_limit = 5  # Set the daily token limit
 
-load_token_usage()
+bf.load_token_usage()
 
 bot.run(bot_token)

@@ -33,7 +33,7 @@ def load_token_usage():
 
 # Save token usage to JSON file
 def save_token_usage():
-    with open(TOKEN_USAGE_FILE, "w") as file:
+    with open("user_token_usage.json", "w") as file:
         json.dump(user_token_usage, file)
 
 # Background task to reset token usage daily
@@ -45,9 +45,9 @@ async def reset_token_usage():
         print("Token usage has been reset.")
 
 
-async def think(interaction: discord.Interaction, thought: str, chat_session=[], daily_token_limit=5, user_token_usage={}):
+async def think(interaction: discord.Interaction, thought: str, daily_token_limit=5, user_token_usage={}):
     user_id = str(interaction.user.id)  # Use string keys for JSON compatibility
-
+    chat_session = []
     # Initialize token usage for the user if not already present
     if user_id not in user_token_usage:
         user_token_usage[user_id] = 0
