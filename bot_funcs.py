@@ -1,4 +1,3 @@
-from Marlene import chat_session
 import discord
 import LLM
 import json
@@ -50,7 +49,7 @@ async def reset_token_usage():
 
 
 
-async def think(interaction: discord.Interaction, thought: str):
+async def think(interaction: discord.Interaction, thought: str, chat_session=[]):
     user_id = str(interaction.user.id)  # Use string keys for JSON compatibility
 
     # Initialize token usage for the user if not already present
@@ -84,5 +83,7 @@ async def think(interaction: discord.Interaction, thought: str):
             await interaction.followup.send(chunk)
         else:
             await interaction.channel.send(chunk)
+    
+    return chat_session
 
     #await interaction.followup.send(f"{answer_content}")

@@ -97,7 +97,8 @@ async def update_status():
 
 @bot.tree.command(name="think", description="Use a THINK TOKEN to have Marlene think about something")
 async def think_command(interaction: discord.Interaction, thought: str):
-    await think(interaction, thought)
+    chat = await think(interaction, thought)
+    chat_session += chat
 
 @bot.tree.command(name="speak", description="Have Marlene speak a message using ElevenLabs")
 async def speak(interaction: discord.Interaction, message: str):
