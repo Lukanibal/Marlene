@@ -97,7 +97,7 @@ async def update_status():
 
 @bot.tree.command(name="think", description="Use a THINK TOKEN to have Marlene think about something")
 async def think_command(interaction: discord.Interaction, thought: str):
-    chat = await think(interaction, thought)
+    chat = await think(interaction, thought, chat_session, daily_token_limit, user_token_usage)
     chat_session += chat
 
 @bot.tree.command(name="speak", description="Have Marlene speak a message using ElevenLabs")
@@ -228,6 +228,10 @@ async def on_message(message):
 
 
 # Load token usage on startup
+# Token usage tracker
+user_token_usage = {}
+daily_token_limit = 5  # Set the daily token limit
+
 load_token_usage()
 
 bot.run(bot_token)

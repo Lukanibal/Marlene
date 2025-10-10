@@ -15,18 +15,15 @@ async def split_string(input_string):
         return [input_string]
 
 
-# File to store token usage
-TOKEN_USAGE_FILE = "user_token_usage.json"
 
-# Token usage tracker
-user_token_usage = {}
-daily_token_limit = 5  # Set the daily token limit
+
+
 
 # Load token usage from JSON file
 def load_token_usage():
     global user_token_usage
     try:
-        with open(TOKEN_USAGE_FILE, "r") as file:
+        with open("user_token_usage.json", "r") as file:
             user_token_usage = json.load(file)
     except FileNotFoundError:
         user_token_usage = {}
@@ -48,8 +45,7 @@ async def reset_token_usage():
         print("Token usage has been reset.")
 
 
-
-async def think(interaction: discord.Interaction, thought: str, chat_session=[]):
+async def think(interaction: discord.Interaction, thought: str, chat_session=[], daily_token_limit=5, user_token_usage={}):
     user_id = str(interaction.user.id)  # Use string keys for JSON compatibility
 
     # Initialize token usage for the user if not already present
