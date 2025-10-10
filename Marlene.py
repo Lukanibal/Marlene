@@ -146,6 +146,8 @@ async def on_message(message):
     # Check if Marlene is mentioned by user_id or name
     marlene_mentioned = bot.user in message.mentions or "marlene" in message.content.lower()
 
+    should_reply = False if message.author.bot else marlene_mentioned
+
     if message.author.bot and marlene_mentioned:
         bot_check = bl.handle_bot_message(message.author.name)
         if bot_check == -1:
@@ -158,7 +160,7 @@ async def on_message(message):
                     model="qwen-plus",
                     messages=[{"role": "system", "content": prompts["system"]}] + prompt
                 )
-            await message.reply(response.choices[0].message.content, mention_author=True)
+            await message.reply(response.choices[0].message.content, mention_author=should_reply)
             return
     
 
@@ -211,17 +213,17 @@ async def on_message(message):
                             description=response,
                             color=discord.Color.teal()
                         )
-                        await message.reply(embed=embed, file=discord.File(tts_file), mention_author=True)
+                        await message.reply(embed=embed, file=discord.File(tts_file), mention_author=should_reply)
                     else:
-                        await message.reply("Sorry, there was an error generating the speech.", mention_author=True)
+                        await message.reply("Sorry, there was an error generating the speech.", mention_author=should_reply)
                 else:
                     chunks = await bf.split_string(response)
                     for index, chunk in enumerate(chunks):
                         if index == 0:
                             if gif_choice is not None:
-                                await message.reply(f"{chunk} [gif]({gif_choice})", mention_author=True)
+                                await message.reply(f"{chunk} [gif]({gif_choice})", mention_author=should_reply)
                             else:
-                                await message.reply(chunk, mention_author=True)
+                                await message.reply(chunk, mention_author=should_reply)
                         else:
                             await message.reply(chunk, mention_author=False)
                 
