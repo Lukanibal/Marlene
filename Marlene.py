@@ -13,7 +13,7 @@ import bot_limiter as bl
 from elevenlabs.client import ElevenLabs
 import tts
 import gif
-import LLM
+import Qwen
 from bot_funcs import split_string, load_token_usage, think
 
 elevenlabs = ElevenLabs(
@@ -168,7 +168,7 @@ async def on_message(message):
 
     gif_choice = None
     if gif_trigger:
-        gif_query = await LLM.generate_response( f"Formulate a short tenorgif search query based this message for an extra sassy reply:{message.content.lower().replace("(gif)", "").replace("(meme)", "").replace("(jif)", "").strip()}")
+        gif_query = await Qwen.generate_response( f"Formulate a short tenorgif search query based this message for an extra sassy reply:{message.content.lower().replace("(gif)", "").replace("(meme)", "").replace("(jif)", "").strip()}")
         gif_choice = gif.get_gif(gif_query)
 
     # Analyze the message content
@@ -196,7 +196,7 @@ async def on_message(message):
                 }
                 chat_session.append(response_prompt)
     
-                response = await LLM.generate_response(message.content)
+                response = await Qwen.generate_response(message.content)
 
                 chat_session.append({"role": "assistant", "content": response})
                 if len(chat_session) > 10:  # Limit chat session history to last 10 messages

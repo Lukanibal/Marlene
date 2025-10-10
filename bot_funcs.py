@@ -1,5 +1,5 @@
 import discord
-import LLM
+import Qwen
 import json
 import asyncio
 
@@ -70,7 +70,7 @@ async def think(interaction: discord.Interaction, thought: str, chat_session=[])
 
     # Process the think command
     await interaction.response.defer()
-    answer_content = await LLM.generate_response(thought, think=True)
+    answer_content = await Qwen.generate_response(thought, think=True)
 
     chat_session.append({"role": "user", "content": thought})
     chat_session.append({"role": "assistant", "content": answer_content})
