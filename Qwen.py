@@ -15,14 +15,14 @@ client = OpenAI(
     base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
 )
 
-async def generate_response(prompt, think=False):
+async def generate_response(prompt, think=False, chat=[]):
     if think:
         completion = client.chat.completions.create(
         model="qwen-plus",
         messages=[
             {"role": "system", "content": prompts["system"]},
             {"role": "user", "content": prompt}
-        ],
+        ] + chat,
         stream=True,
         top_p=0.8,
         temperature=0.7,
