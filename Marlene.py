@@ -44,7 +44,7 @@ class Marlene(discord.Client):
         # Start the background task to reset token usage
         asyncio.create_task(bf.reset_token_usage())
         # Start the background task to update status
-        asyncio.create_task(update_status(chat_session))
+        asyncio.create_task(update_status())
 
     async def on_ready(self):
         if self.synced:
@@ -66,14 +66,10 @@ client = OpenAI(
 )
 
 # Background task to update Marlene's status using the LLM
-async def update_status(chat):
+async def update_status():
     while True:
         try:
-            # Collect recent conversational context (example: last 5 interactions)
-            context = "\n".join(chat[-5:]) if chat else "No context, go wild!"
-
-            # Query the LLM for a new status
-            response = await Qwen.generate_response(f"Generate a witty and engaging Discord status (under 128 characters) based on the following context:\n{context}", False, chat)
+            response = await Qwen.generate_response(f"Generate a witty and engaging Discord status (under 128 characters) based on chat context", False, chat_session)
             '''client.chat.completions.create(
                 model="qwen-plus",
                 messages=[
@@ -82,12 +78,11 @@ async def update_status(chat):
                 ]
             )'''
 
-            # Update Marlene's status
             await bot.change_presence(activity=discord.CustomActivity(name=response, emoji='👀'))
         except Exception as e:
-            print(f"Error updating status: {e} : {response}\ncontext: {context}")
+            print(f"Error updating status: {e} : {response}")
 
-        await asyncio.sleep(60)  # Update every 5 minutes
+        await asyncio.sleep(300) 
 
 
 
@@ -166,7 +161,7 @@ async def on_message(message):
 
     if message.author.bot:
         if user_id in last_response_time:
-            if current_time - last_response_time[user_id] < 10:
+            if current_time - last_response_time[user_id] < 60:
                 return
 
     last_response_time[user_id] = current_time
