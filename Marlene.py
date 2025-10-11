@@ -15,6 +15,7 @@ import tts
 import gif
 import Qwen
 import bot_funcs as bf
+import time
 
 elevenlabs = ElevenLabs(
   api_key=os.getenv("ELEVEN_LABS_KEY"),
@@ -26,6 +27,7 @@ lukan_id = os.getenv("LUKAN_ID")
 bot_token = os.getenv("DISCORD_TOKEN")
 
 chat_session = []
+last_response_time = {}
 
 class Marlene(discord.Client):
     def __init__(self):
@@ -71,7 +73,7 @@ async def update_status():
             context = "\n".join(chat_session[-5:]) if chat_session else "No recent interactions."
 
             # Query the LLM for a new status
-            response = await Qwen.generate_response(f"Generate a witty and engaging Discord status for Marlene based on the following context:\n{context}\n\nThe status should be concise (under 128 characters) and reflect Marlene's personality. Avoid using special characters.")
+            response = await Qwen.generate_response(f"Generate a witty and engaging Discord status (under 128 characters) based on the following context:\n{context}")
             
             '''client.chat.completions.create(
                 model="qwen-plus",
@@ -84,7 +86,7 @@ async def update_status():
             # Update Marlene's status
             await bot.change_presence(activity=discord.CustomActivity(name=response, emoji='👀'))
         except Exception as e:
-            print(f"Error updating status: {e} : {response}\nchat_session: {chat_session}")
+            print(f"Error updating status: {e} : {response}\ncontext: {context}")
 
         await asyncio.sleep(60)  # Update every 5 minutes
 
@@ -160,6 +162,15 @@ async def on_message(message):
             await message.reply(response.choices[0].message.content, mention_author=should_reply)
             return
     
+    current_time = time.time()
+    user_id = message.author.id 
+
+    if message.author.bot:
+        if user_id in last_response_time:
+            if current_time - last_response_time[user_id] < 10:
+                return
+
+    last_response_time[user_id] = current_time
 
     tts_trigger = any(keyword in message.content.lower() for keyword in ["(tts)", "(speak)", "(say)"])
 
