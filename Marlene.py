@@ -44,7 +44,7 @@ class Marlene(discord.Client):
         # Start the background task to reset token usage
         asyncio.create_task(bf.reset_token_usage())
         # Start the background task to update status
-        asyncio.create_task(update_status())
+        asyncio.create_task(update_status(chat_session))
 
     async def on_ready(self):
         if self.synced:
@@ -66,15 +66,14 @@ client = OpenAI(
 )
 
 # Background task to update Marlene's status using the LLM
-async def update_status():
+async def update_status(chat):
     while True:
         try:
             # Collect recent conversational context (example: last 5 interactions)
-            context = "\n".join(chat_session[-5:]) if chat_session else "No recent interactions."
+            context = "\n".join(chat[-5:]) if chat else "No context, go wild!"
 
             # Query the LLM for a new status
-            response = await Qwen.generate_response(f"Generate a witty and engaging Discord status (under 128 characters) based on the following context:\n{context}")
-            
+            response = await Qwen.generate_response(f"Generate a witty and engaging Discord status (under 128 characters) based on the following context:\n{context}", False, chat)
             '''client.chat.completions.create(
                 model="qwen-plus",
                 messages=[
@@ -178,7 +177,7 @@ async def on_message(message):
 
     gif_choice = None
     if gif_trigger:
-        gif_query = await Qwen.generate_response( f"Formulate a short tenorgif search query based this message for an extra sassy reply:{message.content.lower().replace("(gif)", "").replace("(meme)", "").replace("(jif)", "").strip()}")
+        gif_query = await Qwen.generate_response( f"Formulate a short tenorgif search query based this message for an extra sassy reply:{message.content.lower().replace("(gif)", "").replace("(meme)", "").replace("(jif)", "").strip()}", False, chat_session)
         gif_choice = gif.get_gif(gif_query)
 
     # Analyze the message content
@@ -201,7 +200,7 @@ async def on_message(message):
             async with message.channel.typing():
                 
     
-                response = await Qwen.generate_response(message.content)
+                response = await Qwen.generate_response(message.content, False, chat_session)
                 
                 chat_session.append({"role": "user", "content": message.content})
                 chat_session.append({"role": "assistant", "content": response})
