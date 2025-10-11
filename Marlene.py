@@ -81,13 +81,10 @@ async def update_status():
                 ]
             )'''
 
-            # Extract the generated status
-            new_status = response.strip()
-
             # Update Marlene's status
-            await bot.change_presence(activity=discord.CustomActivity(name=new_status, emoji='👀'))
+            await bot.change_presence(activity=discord.CustomActivity(name=response, emoji='👀'))
         except Exception as e:
-            print(f"Error updating status: {e} : {new_status}")
+            print(f"Error updating status: {e} : {new_status}\nchat_session: {chat_session}")
 
         await asyncio.sleep(300)  # Update every 5 minutes
 
@@ -191,15 +188,11 @@ async def on_message(message):
 
         if should_respond:
             async with message.channel.typing():
-                # Generate a response
-                response_prompt = {
-                    "role": "user",
-                    "content": f"Marlene, respond to this message: {message.content}"
-                }
-                chat_session.append(response_prompt)
+                
     
                 response = await Qwen.generate_response(message.content)
-
+                
+                chat_session.append({"role": "user", "content": message.content})
                 chat_session.append({"role": "assistant", "content": response})
                 if len(chat_session) > 10:  # Limit chat session history to last 10 messages
                     chat_session.pop(0)
