@@ -84,9 +84,9 @@ async def update_status():
             # Update Marlene's status
             await bot.change_presence(activity=discord.CustomActivity(name=response, emoji='👀'))
         except Exception as e:
-            print(f"Error updating status: {e} : {new_status}\nchat_session: {chat_session}")
+            print(f"Error updating status: {e} : {response}\nchat_session: {chat_session}")
 
-        await asyncio.sleep(300)  # Update every 5 minutes
+        await asyncio.sleep(60)  # Update every 5 minutes
 
 
 
