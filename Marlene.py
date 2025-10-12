@@ -82,7 +82,7 @@ async def update_status():
         except Exception as e:
             print(f"Error updating status: {e} : {response}")
 
-        await asyncio.sleep(300) 
+        await asyncio.sleep(3600) # Update every hour
 
 
 
