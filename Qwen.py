@@ -15,12 +15,12 @@ client = OpenAI(
     base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
 )
 
-async def generate_response(prompt, think=False, chat=[]):
+async def generate_response(prompt:str, think:bool=False, chat:list=[], current_mood:str = "annoyed"):
     if think:
         completion = client.chat.completions.create(
         model="qwen-plus",
         messages=[
-            {"role": "system", "content": prompts["system"]},
+            {"role": "system", "content": f"{prompts["system"]}\n\rYou are currently in a {current_mood} mood."},
             {"role": "user", "content": prompt}
         ] + chat,
         stream=True,

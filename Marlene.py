@@ -3,12 +3,9 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import discord
 from discord import app_commands
-from prompts import prompts
-import requests
+from prompts import prompts, moods
 import asyncio
-import json
 from datetime import datetime, timedelta
-import random
 import bot_limiter as bl
 from elevenlabs.client import ElevenLabs
 import tts
@@ -16,6 +13,7 @@ import gif
 import Qwen
 import bot_funcs as bf
 import time
+import random
 
 elevenlabs = ElevenLabs(
   api_key=os.getenv("ELEVEN_LABS_KEY"),
@@ -26,8 +24,20 @@ load_dotenv()
 lukan_id = os.getenv("LUKAN_ID")
 bot_token = os.getenv("DISCORD_TOKEN")
 
+current_mood = random.choice(moods)
+
 chat_session = []
 last_response_time = {}
+
+async def change_mood(moods):
+    global current_mood
+    while True:
+        await asyncio.sleep(720) #
+        new_mood = random.choice(moods)
+        while new_mood == current_mood:
+            new_mood = random.choice(moods)
+        current_mood = new_mood
+        print(f"Marlene's mood has changed to: {current_mood}")
 
 class Marlene(discord.Client):
     def __init__(self):
@@ -41,10 +51,9 @@ class Marlene(discord.Client):
         self.synced = False
 
     async def setup_hook(self):
-        # Start the background task to reset token usage
         asyncio.create_task(bf.reset_token_usage())
-        # Start the background task to update status
         asyncio.create_task(update_status())
+        asyncio.create_task(change_mood(moods))
 
     async def on_ready(self):
         if self.synced:
@@ -65,11 +74,10 @@ client = OpenAI(
     base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
 )
 
-# Background task to update Marlene's status using the LLM
 async def update_status():
     while True:
         try:
-            response = await Qwen.generate_response(f"Generate a witty and engaging Discord status (under 128 characters) based on chat context", False, chat_session)
+            response = await Qwen.generate_response(f"Generate a witty and engaging Discord status (under 128 characters) based on chat context", False, chat_session, current_mood)
             '''client.chat.completions.create(
                 model="qwen-plus",
                 messages=[
@@ -172,21 +180,22 @@ async def on_message(message):
 
     gif_choice = None
     if gif_trigger:
-        gif_query = await Qwen.generate_response( f"Formulate a short tenorgif search query based this message for an extra sassy reply:{message.content.lower().replace("(gif)", "").replace("(meme)", "").replace("(jif)", "").strip()}", False, chat_session)
+        gif_query = await Qwen.generate_response( f"Formulate a short tenorgif search query based this message for an extra sassy reply:{message.content.lower().replace("(gif)", "").replace("(meme)", "").replace("(jif)", "").strip()}", False, chat_session, current_mood)
         gif_choice = gif.get_gif(gif_query)
 
-    # Analyze the message content
     if marlene_mentioned:
-        # Use a language model to decide if Marlene should respond
-        prompt = {
-            "role": "user",
-            "content": f"Should Marlene respond to this message; yes or no? Message: {message.content}"
-        }
-        decision = client.chat.completions.create(
-            model="qwen-flash",
-            temperature=0.0,
-            messages=[{"role": "system", "content": "You are a basic input output machine, only respond with yes or no."}, prompt]
-        )
+        if bot.user in message.mentions:
+            should_respond = True
+        else:
+            prompt = {
+                "role": "user",
+                "content": f"Should Marlene respond to this message; yes or no? Message: {message.content}"
+            }
+            decision = client.chat.completions.create(
+                model="qwen-flash",
+                temperature=0.0,
+                messages=[{"role": "system", "content": "You are a basic input output machine, only respond with yes or no."}, prompt]
+            )
 
         # Parse the decision
         should_respond = "yes" in decision.choices[0].message.content.lower()
@@ -195,7 +204,7 @@ async def on_message(message):
             async with message.channel.typing():
                 
     
-                response = await Qwen.generate_response(message.content, False, chat_session)
+                response = await Qwen.generate_response(message.content, False, chat_session, current_mood)
                 
                 chat_session.append({"role": "user", "content": message.content})
                 chat_session.append({"role": "assistant", "content": response})

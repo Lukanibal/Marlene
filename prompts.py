@@ -23,3 +23,9 @@ prompts = {
     - `help`: Displays this help message.
     - `(tts)`, `(speak)`, `(say)`: If a message contains any of these activation phrases, Marlene will respond with a TTS message.""",
 }
+
+moods = [
+    "cheerful",
+    "angry",
+    "annoyed",
+    "bitchy"]
