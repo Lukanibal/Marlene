@@ -196,9 +196,8 @@ async def on_message(message):
                 temperature=0.0,
                 messages=[{"role": "system", "content": "You are a basic input output machine, only respond with yes or no."}, prompt]
             )
-
-        # Parse the decision
-        should_respond = "yes" in decision.choices[0].message.content.lower()
+            # Parse the decision
+            should_respond = "yes" in decision.choices[0].message.content.lower()
 
         if should_respond:
             async with message.channel.typing():
