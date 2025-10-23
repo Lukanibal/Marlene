@@ -32,7 +32,7 @@ last_response_time = {}
 async def change_mood(moods):
     global current_mood
     while True:
-        await asyncio.sleep(720) #
+        await asyncio.sleep(720) 
         new_mood = random.choice(moods)
         while new_mood == current_mood:
             new_mood = random.choice(moods)
@@ -95,6 +95,20 @@ async def update_status():
 
 
 
+@bot.tree.command(name="mood", description="Get or set Marlene's current mood")
+async def mood(interaction: discord.Interaction, mood: str = None):
+    global current_mood
+    if mood:
+        if interaction.user.id != int(lukan_id):
+            await interaction.response.send_message("Only Lukan may set my mood", ephemeral=True)
+            return
+        if mood.lower() in moods:
+            current_mood = mood.lower()
+            await interaction.response.send_message(f"Marlene's mood has been set to: {current_mood}", ephemeral=True)
+        else:
+            await interaction.response.send_message(f"Invalid mood. Available moods are: {', '.join(moods)}", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"Marlene's current mood is: {current_mood}", ephemeral=True)
 
 @bot.tree.command(name="think", description="Use a THINK TOKEN to have Marlene think about something")
 async def think_command(interaction: discord.Interaction, thought: str):
