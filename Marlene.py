@@ -220,7 +220,6 @@ async def on_message(message):
                 async for message in message.channel.history(limit=10):
                     chat_session.append({"role": "user","name" : message.author.name, "content": message.content})
 
-                chat_session.reverse()
     
                 response = await Qwen.generate_response(message.content, False, chat_session, current_mood)
                 
