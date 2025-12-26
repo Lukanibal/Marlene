@@ -217,9 +217,9 @@ async def on_message(message):
             async with message.channel.typing():
                 
                 chat_session.clear()
-                async for message in message.channel.history(limit=12):
+                async for message in message.channel.history(limit=10, oldest_first=True):
                     if message.author != bot.user:
-                        chat_session.append({"role": "user", "content": message.content})
+                        chat_session.append({"role": "user","name" : message.author.username, "content": message.content})
     
                 response = await Qwen.generate_response(message.content, False, chat_session, current_mood)
                 
