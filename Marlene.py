@@ -218,10 +218,11 @@ async def on_message(message):
                 
                 chat_session.clear()
                 async for message in message.channel.history(limit=10):
-                    if message.author != bot.user:
-                        chat_session.append({"role": "user","name" : message.author.name, "content": message.content})
+                    chat_session.append({"role": "user","name" : message.author.name, "content": message.content})
+
+                chat_session.reverse()
     
-                response = await Qwen.generate_response(message.content, False, chat_session.reverse(), current_mood)
+                response = await Qwen.generate_response(message.content, False, chat_session, current_mood)
                 
                 chat_session.append({"role": "user", "content": message.content})
                 chat_session.append({"role": "assistant", "content": response})
