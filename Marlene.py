@@ -214,18 +214,14 @@ async def on_message(message):
             should_respond = "yes" in decision.choices[0].message.content.lower()
 
         if should_respond:
+            chat_session.clear()
+            async for message in message.channel.history(limit=5):
+                chat_session.append({"role": "user","name" : message.author.name, "content": message.content})
+
             async with message.channel.typing():
                 
-                chat_session.clear()
-                async for message in message.channel.history(limit=5):
-                    chat_session.append({"role": "user","name" : message.author.name, "content": message.content})
-
-    
                 response = await Qwen.generate_response(message.content, False, chat_session, current_mood)
                 
-                
-                
-                # Send the response
                 if tts_trigger:
                     tts_file = await tts.text_to_speech(response, file_name=f"marlene_reply_{message.id}")
                     if tts_file:
