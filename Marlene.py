@@ -218,7 +218,7 @@ async def on_message(message):
             async for message in message.channel.history(limit=5):
                 chat_session.append({"role": "user","name" : message.author.name, "content": message.content})
 
-            chat_session.sort(key=lambda x: x.get('timestamp', 0))
+            chat_session.sort(key=lambda x: x.get('created_at', 0))
             async with message.channel.typing():
                 
                 response = await Qwen.generate_response(message.content, False, chat_session, current_mood)
