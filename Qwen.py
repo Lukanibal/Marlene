@@ -66,6 +66,6 @@ async def generate_response(prompt:str, think:bool=False, chat:list=[], current_
     else:
         response = client.chat.completions.create(
             model="qwen-plus",
-            messages=[{"role": "system", "content": f"{prompts["system"]}\n\rYou are currently in a {current_mood} mood, respond accordingly."}, {"role": "user", "content": f"Marlene, respond to this message: {prompt}"}]
+            messages= [{"role": "system", "content": f"here is the conversation so far: "},] + chat +[{"role": "system", "content": f"{prompts["system"]}\n\rYou are currently in a {current_mood} mood, respond accordingly."}, {"role": "user", "content": f"Marlene, respond to this message: {prompt}"}]
         )
         return response.choices[0].message.content
