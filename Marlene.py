@@ -219,7 +219,24 @@ async def on_message(message):
                 chat_session.append({"role": "user","name" : message.author.name, "content": message.content, "created_at": message.created_at})
                 print(f"{message.author.name}: {message.content} : {message.created_at}")
 
-            chat_session.sort(key=lambda x: x.get('created_at', 0))
+            # Debugging and validation for chat_session sorting
+            print("Before sorting:", chat_session)  # Debugging: Print chat_session before sorting
+
+            # Ensure all entries have a valid 'created_at' field and parse timestamps
+            for entry in chat_session:
+                if 'created_at' in entry:
+                    try:
+                        entry['created_at'] = datetime.fromisoformat(entry['created_at'])
+                    except ValueError:
+                        entry['created_at'] = datetime.min  # Default to earliest possible datetime if parsing fails
+                else:
+                    entry['created_at'] = datetime.min  # Default to earliest possible datetime if 'created_at' is missing
+
+            # Sort chat_session by 'created_at' in descending order
+            chat_session.sort(key=lambda x: x['created_at'], reverse=True)
+
+            print("After sorting:", chat_session)  # Debugging: Print chat_session after sorting
+
             async with message.channel.typing():
                 
                 response = await Qwen.generate_response(message.content, False, chat_session, current_mood)
