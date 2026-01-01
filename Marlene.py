@@ -154,6 +154,8 @@ async def delete_message(interaction: discord.Interaction, message_id: str):
 #=============================================#
 @bot.event 
 async def on_message(message):
+    chat_session.append({"role": "user", "content": message.content})
+    chat_session = chat_session[-10:]  # Keep only the last 10 messages for context
     # We do not want the bot to reply to itself
     if message.author == bot.user or message.channel.id == int(os.getenv("IGNORED_CHANNEL")):
         return
@@ -214,19 +216,8 @@ async def on_message(message):
             should_respond = "yes" in decision.choices[0].message.content.lower()
 
         if should_respond:
-            chat_session.clear()
             msg = message
-            async for message in message.channel.history(limit=5):
-                chat_session.append({"role": "user","name" : message.author.name, "content": message.content, "created_at": message.created_at.strftime("%Y-%m-%d %H:%M:%S")})
-                print(f"{message.author.name}: {message.content} : {message.created_at}")
-
-            # Debugging and validation for chat_session sorting
-            print("BEFORE sorting:", chat_session)  # Debugging: Print chat_session before sorting
-
-            """chat_session.sort(key=lambda x: x['created_at'])"""
-
-            print("AFTER sorting:", chat_session)  # Debugging: Print chat_session after sorting
-
+            
             async with message.channel.typing():
                 
                 response = await Qwen.generate_response(msg, False, chat_session, current_mood)
