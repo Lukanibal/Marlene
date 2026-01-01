@@ -216,7 +216,7 @@ async def on_message(message):
         if should_respond:
             chat_session.clear()
             async for message in message.channel.history(limit=5):
-                chat_session.append({"role": "user","name" : message.author.name, "content": message.content, "created_at": message.created_at})
+                chat_session.append({"role": "user","name" : message.author.name, "content": message.content, "created_at": message.created_at.strftime("%Y-%m-%d %H:%M:%S")})
                 print(f"{message.author.name}: {message.content} : {message.created_at}")
 
             # Debugging and validation for chat_session sorting
