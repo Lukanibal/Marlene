@@ -226,7 +226,7 @@ async def on_message(message):
             for entry in chat_session:
                 if 'created_at' in entry:
                     try:
-                        entry['created_at'] = datetime.fromisoformat(entry['created_at'])
+                        entry['created_at'] = datetime.isoformat(entry['created_at'])
                     except ValueError:
                         entry['created_at'] = datetime.min  # Default to earliest possible datetime if parsing fails
                 else:
