@@ -216,7 +216,7 @@ async def on_message(message):
         if should_respond:
             chat_session.clear()
             async for message in message.channel.history(limit=5):
-                chat_session.append({"role": "user","name" : message.author.name, "content": message.content, "created_at": message.created_at.timestamp()})
+                chat_session.append({"role": "user","name" : message.author.name, "content": message.content, "created_at": message.created_at})
 
             chat_session.sort(key=lambda x: x.get('created_at', 0))
             async with message.channel.typing():
