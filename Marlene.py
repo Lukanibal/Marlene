@@ -233,7 +233,7 @@ async def on_message(message):
                     entry['created_at'] = datetime.min  # Default to earliest possible datetime if 'created_at' is missing
 
             # Sort chat_session by 'created_at' in descending order
-            chat_session.sort(key=lambda x: x['created_at'], reverse=True)
+            chat_session.sort(key=lambda x: x['created_at'])
 
             print("After sorting:", chat_session)  # Debugging: Print chat_session after sorting
 
