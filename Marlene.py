@@ -223,7 +223,7 @@ async def on_message(message):
             # Debugging and validation for chat_session sorting
             print("BEFORE sorting:", chat_session)  # Debugging: Print chat_session before sorting
 
-            chat_session.sort(key=lambda x: x['created_at'])
+            """chat_session.sort(key=lambda x: x['created_at'])"""
 
             print("AFTER sorting:", chat_session)  # Debugging: Print chat_session after sorting
 
