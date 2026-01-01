@@ -21,8 +21,9 @@ async def generate_response(prompt:str, think:bool=False, chat:list=[], current_
         model="qwen-plus",
         messages=[
             {"role": "system", "content": f"{prompts["system"]}\n\rYou are currently in a {current_mood} mood, respond accordingly."},
+        ] + chat +[
             {"role": "user", "content": prompt}
-        ] + chat,
+        ],
         stream=True,
         top_p=0.8,
         temperature=0.7,
