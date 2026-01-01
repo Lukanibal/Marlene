@@ -215,6 +215,7 @@ async def on_message(message):
 
         if should_respond:
             chat_session.clear()
+            msg = message;
             async for message in message.channel.history(limit=5):
                 chat_session.append({"role": "user","name" : message.author.name, "content": message.content, "created_at": message.created_at.strftime("%Y-%m-%d %H:%M:%S")})
                 print(f"{message.author.name}: {message.content} : {message.created_at}")
@@ -228,7 +229,7 @@ async def on_message(message):
 
             async with message.channel.typing():
                 
-                response = await Qwen.generate_response(message.content, False, chat_session, current_mood)
+                response = await Qwen.generate_response(msg, False, chat_session, current_mood)
                 
                 if tts_trigger:
                     tts_file = await tts.text_to_speech(response, file_name=f"marlene_reply_{message.id}")
