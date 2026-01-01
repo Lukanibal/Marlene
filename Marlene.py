@@ -220,22 +220,11 @@ async def on_message(message):
                 print(f"{message.author.name}: {message.content} : {message.created_at}")
 
             # Debugging and validation for chat_session sorting
-            print("Before sorting:", chat_session)  # Debugging: Print chat_session before sorting
+            print("BEFORE sorting:", chat_session)  # Debugging: Print chat_session before sorting
 
-            # Ensure all entries have a valid 'created_at' field and parse timestamps
-            for entry in chat_session:
-                if 'created_at' in entry:
-                    try:
-                        entry['created_at'] = datetime.isoformat(entry['created_at'])
-                    except ValueError:
-                        entry['created_at'] = datetime.min  # Default to earliest possible datetime if parsing fails
-                else:
-                    entry['created_at'] = datetime.min  # Default to earliest possible datetime if 'created_at' is missing
-
-            # Sort chat_session by 'created_at' in descending order
             chat_session.sort(key=lambda x: x['created_at'])
 
-            print("After sorting:", chat_session)  # Debugging: Print chat_session after sorting
+            print("AFTER sorting:", chat_session)  # Debugging: Print chat_session after sorting
 
             async with message.channel.typing():
                 
