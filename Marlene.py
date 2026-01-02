@@ -154,8 +154,6 @@ async def delete_message(interaction: discord.Interaction, message_id: str):
 #=============================================#
 @bot.event 
 async def on_message(message):
-    chat_session.append({"role": "user", "content": message.content})
-    chat_session = chat_session[-10:]  # Keep only the last 10 messages for context
     # We do not want the bot to reply to itself
     if message.author == bot.user or message.channel.id == int(os.getenv("IGNORED_CHANNEL")):
         return
@@ -216,11 +214,21 @@ async def on_message(message):
             should_respond = "yes" in decision.choices[0].message.content.lower()
 
         if should_respond:
-            msg = message
-            
+            chat_session.clear()
+            async for past_message in message.channel.history(limit=5):
+                chat_session.append({"role": "user","name" : past_message.author.name, "content": past_message.content, "created_at": past_message.created_at.strftime("%Y-%m-%d %H:%M:%S")})
+                print(f"{past_message.author.name}: {past_message.content} : {past_message.created_at}")
+
+            # Debugging and validation for chat_session sorting
+            print("BEFORE sorting:", chat_session)  # Debugging: Print chat_session before sorting
+
+            chat_session.sort(key=lambda x: x['created_at'])
+
+            print("AFTER sorting:", chat_session)  # Debugging: Print chat_session after sorting
+
             async with message.channel.typing():
                 
-                response = await Qwen.generate_response(message, False, chat_session, current_mood)
+                response = await Qwen.generate_response(message.content, False, chat_session, current_mood)
                 
                 if tts_trigger:
                     tts_file = await tts.text_to_speech(response, file_name=f"marlene_reply_{message.id}")
