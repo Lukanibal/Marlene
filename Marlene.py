@@ -220,7 +220,7 @@ async def on_message(message):
             
             async with message.channel.typing():
                 
-                response = await Qwen.generate_response(msg, False, chat_session, current_mood)
+                response = await Qwen.generate_response(message, False, chat_session, current_mood)
                 
                 if tts_trigger:
                     tts_file = await tts.text_to_speech(response, file_name=f"marlene_reply_{message.id}")
