@@ -154,6 +154,8 @@ async def delete_message(interaction: discord.Interaction, message_id: str):
 #=============================================#
 @bot.event 
 async def on_message(message):
+    chat_session.append({"role": "user", "content": message.content})
+    chat_session = chat_session[-10:]  # Keep only the last 10 messages for context
     # We do not want the bot to reply to itself
     if message.author == bot.user or message.channel.id == int(os.getenv("IGNORED_CHANNEL")):
         return
@@ -228,7 +230,7 @@ async def on_message(message):
 
             async with message.channel.typing():
                 
-                response = await Qwen.generate_response(message.content, False, chat_session, current_mood)
+                response = await Qwen.generate_response(msg, False, chat_session, current_mood)
                 
                 if tts_trigger:
                     tts_file = await tts.text_to_speech(response, file_name=f"marlene_reply_{message.id}")
