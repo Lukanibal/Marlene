@@ -215,7 +215,7 @@ async def on_message(message):
 
         if should_respond:
             chat_session.clear()
-            async for past_message in message.channel.history(limit=5):
+            async for past_message in message.channel.history(limit=10):
                 chat_session.append({"role": "user","name" : past_message.author.name, "content": past_message.content, "created_at": past_message.created_at.strftime("%Y-%m-%d %H:%M:%S")})
                 print(f"{past_message.author.name}: {past_message.content} : {past_message.created_at}")
 
